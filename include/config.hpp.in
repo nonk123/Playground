@@ -1,0 +1,1 @@
+#cmakedefine PLAYGROUND_DRIVER irr::video::EDT_@PLAYGROUND_DRIVER@

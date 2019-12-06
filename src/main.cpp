@@ -1,9 +1,6 @@
-#include <iostream>
-
-#include "btBulletDynamicsCommon.h"
-#include "irrlicht.h"
+#include "Game.hpp"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+    Playground::Game game;
+    return game.run();
 }
