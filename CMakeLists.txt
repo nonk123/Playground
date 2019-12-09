@@ -9,8 +9,10 @@ find_package(Irrlicht REQUIRED)
 
 set(PLAYGROUND_SRC
   src/main.cpp
-  src/Game.cpp
-  src/EventReceiver.cpp)
+  src/Program.cpp
+  src/EventReceiver.cpp
+  src/World.cpp
+  src/Entity.cpp)
 
 set(PLAYGROUND_DRIVER "OPENGL" CACHE STRING
   "Irrlicht video driver to use, without the irr::video::EDT_ prefix.")

@@ -1,30 +1,34 @@
-#include "Game.hpp"
+#include "Program.hpp"
 
 #include <iostream>
+#include <ctime>
 
 #include "btBulletDynamicsCommon.h"
 #include "irrlicht.h"
 
 #include "EventReceiver.hpp"
-#include "IrrPtr.hpp"
 
 #include "config.hpp"
 
 using namespace Playground;
 
-int Game::run() {
+int Program::run() {
+    std::srand(std::time(nullptr));
+
     using namespace irr;
     using namespace video;
     using namespace scene;
     using namespace gui;
     using namespace core;
 
+    using namespace Game;
+
     E_DRIVER_TYPE driverType = PLAYGROUND_DRIVER;
 
     EventReceiver eventReceiver(*this);
 
-    Utils::IrrPtr<irr::IrrlichtDevice> device(createDevice(driverType,
-            dimension2du(800, 600), 32, false, false, false, &eventReceiver));
+    IrrlichtDevice* device = createDevice(driverType,
+            dimension2du(800, 600), 32, false, false, false, &eventReceiver);
 
     if (!device)
         return 1;
@@ -33,24 +37,34 @@ int Game::run() {
 
     ISceneManager* sceneManager = device->getSceneManager();
     IVideoDriver* driver = device->getVideoDriver();
-    IGUIEnvironment* guiEnv = device->getGUIEnvironment();
+    IGUIEnvironment* gui = device->getGUIEnvironment();
 
-    auto text = guiEnv->addStaticText(L"Test", {0, 0, 100, 20}, true, false);
+    gui->addStaticText(L"q to quit, c to add more cubes", {0, 0, 200, 20}, true);
+
+    this->world = std::make_unique<World>(*sceneManager);
+
+    this->defaultCube = new btBoxShape(btVector3(1, 1, 1));
+
+    world->add(new Entity(new btBoxShape({10, 0.05, 10}), 0, {0, 0, 0}, {0, 0, 0}));
+
+    sceneManager->addCameraSceneNode(nullptr, {1.25, 1.25, 15}, {0, 0, 0});
+
+    const float timestep = 1.0f / 60;
 
     while (running && device->run()) {
-        text->setText(eventReceiver.key.c_str());
+        world->update(timestep);
 
         driver->beginScene(true, true, {255, 127, 127, 127});
         {
             sceneManager->drawAll();
-            guiEnv->drawAll();
+            gui->drawAll();
         }
         driver->endScene();
 
         device->yield();
     }
 
-    std::cout << std::endl;
+    device->drop();
 
     return 0;
 }

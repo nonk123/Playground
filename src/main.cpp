@@ -1,6 +1,6 @@
-#include "Game.hpp"
+#include "Program.hpp"
 
 int main() {
-    Playground::Game game;
+    Playground::Program game;
     return game.run();
 }
