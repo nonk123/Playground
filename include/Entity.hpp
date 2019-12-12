@@ -23,8 +23,7 @@ namespace Playground::Game {
 
         virtual void update();
 
-        virtual ~Entity() {
-        }
+        virtual ~Entity();
     };
 }
 

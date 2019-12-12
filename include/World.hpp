@@ -15,7 +15,7 @@ namespace Playground::Game {
 #include "Entity.hpp"
 
 namespace Playground::Game {
-    typedef unsigned long ID;
+    using ID = unsigned long;
 
     class World {
       private:

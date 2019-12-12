@@ -43,3 +43,6 @@ void Entity::update() {
 
     sceneNode->setRotation(euler);
 }
+
+Entity::~Entity() {
+}

@@ -1,24 +1,16 @@
 #ifndef EVENT_RECEIVER_HPP
 #define EVENT_RECEIVER_HPP
 
-#include "Program.hpp"
-
-#include <string>
-
 #include "irrlicht.h"
 
 namespace Playground {
     class EventReceiver : public irr::IEventReceiver {
-      private:
-        Program& game;
-
       public:
-        std::wstring key = L" ";
+        bool down[irr::KEY_KEY_CODES_COUNT];
 
-        EventReceiver(Program& game) : game(game) {
-        }
+        EventReceiver();
 
-        bool OnEvent(const irr::SEvent& event);
+        bool OnEvent(const irr::SEvent&);
     };
 } // namespace Playground
 
