@@ -7,23 +7,19 @@
 
 using namespace Playground::Game;
 
-Entity::Entity(btCollisionShape* shape,
-               btScalar mass = 0.5,
-               btVector3 origin = {0, 0, 0},
-               btVector3 impulse = {0, 0, 0}) {
+Entity::Entity(ShapePair shape, btVector3 origin = {0, 0, 0}) {
     btTransform transform;
     transform.setIdentity();
     transform.setOrigin(origin);
 
-    btVector3 localInertia;
-    shape->calculateLocalInertia(mass, localInertia);
-
     this->motionState = std::make_unique<btDefaultMotionState>(transform);
+    this->shape = shape.shape;
 
-    this->body = std::make_unique<btRigidBody>(mass, motionState.get(),
-                                               shape, localInertia);
-    body->setFriction(0.9);
-    body->applyCentralImpulse(impulse);
+    this->body = std::unique_ptr<btRigidBody>(shape.makeBody(motionState.get()));
+    body->setRestitution(shape.info.restitution);
+    body->setFriction(shape.info.friction);
+
+    this->mesh = shape.mesh;
 }
 
 void Entity::update() {
@@ -42,7 +38,4 @@ void Entity::update() {
     euler *= Utils::radToDeg<irr::f32>;
 
     sceneNode->setRotation(euler);
-}
-
-Entity::~Entity() {
 }

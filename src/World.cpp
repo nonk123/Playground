@@ -30,24 +30,6 @@ ID World::add(Entity* entity, ID id) {
     if (id > lastID)
         lastID = id;
 
-    irr::core::vector3df size;
-
-    btTransform t;
-    t.setIdentity();
-
-    btVector3 min, max;
-
-    entity->body->getCollisionShape()->getAabb(t, min, max);
-
-    size.X = max.getX() - min.getX();
-    size.Y = max.getY() - min.getY();
-    size.Z = max.getZ() - min.getZ();
-
-    IMesh* mesh = sceneManager.getGeometryCreator()->createCubeMesh(size);
-
-    ISceneNode* sceneNode = sceneManager.addMeshSceneNode(mesh);
-    entity->sceneNode = sceneNode;
-
     ITexture* solid = sceneManager.getVideoDriver()->addRenderTargetTexture({1, 1});
 
     u32 r = std::rand() % 256, g = std::rand() % 256, b = std::rand() % 256;
@@ -56,12 +38,16 @@ ID World::add(Entity* entity, ID id) {
     data[0] = SColor(255, r, g, b).color;
     solid->unlock();
 
+    ISceneNode* sceneNode = sceneManager.addMeshSceneNode(entity->mesh.get());
+    entity->sceneNode = sceneNode;
+
     sceneNode->setMaterialType(EMT_SOLID);
     sceneNode->setMaterialTexture(0, solid);
     sceneNode->setMaterialFlag(EMF_LIGHTING, false);
 
     entity->update();
     entity->world = this;
+
     world.addRigidBody(entity->body.get());
     entities.insert(std::make_pair(id, std::unique_ptr<Entity>(entity)));
 

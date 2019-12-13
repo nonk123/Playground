@@ -12,23 +12,36 @@
 
 using namespace Playground;
 
-btScalar velocity() {
-    static const int limit = 31;
+btScalar impulse() {
+    static const int limit = 16;
 
     btScalar val = static_cast<btScalar>(std::rand() % limit) / 10;
     return std::rand() % 2 ? val : -val;
 }
 
-void Program::acceptInput(EventReceiver& receiver) {
+void Program::acceptInput(EventReceiver& receiver, ShapeCreator& shapes) {
     if (receiver.down[irr::KEY_KEY_Q])
         running = false;
 
-    if (receiver.down[irr::KEY_KEY_C]) {
-         world->add(new Game::Entity(defaultCube,
-                                     0.5f,
-                                     {0, 7.5, 0},
-                                     {velocity(), velocity(), velocity()}));
-         receiver.down[irr::KEY_KEY_C] = false;
+    static ShapePair box = shapes.box(ShapeInfo(), {1, 1, 1});
+    static ShapePair capsule = shapes.capsule(ShapeInfo(), 0.5, 1.5);
+    static ShapePair sphere = shapes.sphere(ShapeInfo(), 0.5);
+
+    ShapePair* shape = nullptr;
+
+    if (receiver.down[irr::KEY_KEY_1])
+        shape = &box;
+
+    if (receiver.down[irr::KEY_KEY_2])
+        shape = &capsule;
+
+    if (receiver.down[irr::KEY_KEY_3])
+        shape = &sphere;
+
+    if (shape) {
+        Game::Entity* entity = new Game::Entity(*shape, {0, 7.5, 0});
+        entity->applyImpulse({impulse(), impulse(), impulse()});
+        world->add(entity);
     }
 
     static const irr::f32 delta = Utils::pi<irr::f32> / 32;
@@ -48,12 +61,12 @@ void Program::acceptInput(EventReceiver& receiver) {
     static const irr::f32 increment = 0.375;
 
     if (receiver.down[irr::KEY_KEY_R]) {
-        cameraDistance -= increment;
+        cameraDistance = std::max(cameraDistance - increment, irr::f32(0.2));
         rotateCameraBy(0, 0);
     }
 
     if (receiver.down[irr::KEY_KEY_F]) {
-        cameraDistance += increment;
+        cameraDistance = std::min(cameraDistance + increment, irr::f32(50));
         rotateCameraBy(0, 0);
     }
 }
@@ -63,7 +76,7 @@ void Program::rotateCameraBy(irr::f32 pitchDelta, irr::f32 yawDelta) {
     static irr::core::quaternion rotation;
 
     static const irr::f32 low = Utils::pi<irr::f32> / 16,
-                          high = Utils::pi<irr::f32> / 3;
+                          high = Utils::pi<irr::f32> / 2.1;
 
     rotation.Y += yawDelta;
     rotation.Z =  std::clamp(rotation.Z + pitchDelta, low, high);
@@ -105,14 +118,15 @@ int Program::run() {
     IVideoDriver* driver = device->getVideoDriver();
     IGUIEnvironment* gui = device->getGUIEnvironment();
 
-    gui->addStaticText(L"q to quit, c to add more cubes\nwasdrf to control camera",
-                       {0, 0, 200, 40});
+    gui->addStaticText(L"q to quit, 1-3 to add more shapes\nwasd rf to control camera",
+                       {0, 0, 200, 20});
 
     this->world = std::make_unique<World>(*sceneManager);
 
-    this->defaultCube = new btBoxShape(btVector3(1, 1, 1));
+    ShapeCreator shapes(sceneManager->getGeometryCreator());
 
-    world->add(new Entity(new btBoxShape({10, 0.05, 10}), 0, {0, 0, 0}, {0, 0, 0}));
+    ShapePair groundShape = shapes.box(ShapeInfo(0), {10, 0.1, 10});
+    world->add(new Entity(groundShape, {0, 0, 0}));
 
     this->camera = sceneManager->addCameraSceneNode(nullptr, {}, {});
     rotateCameraBy(0.8, 0.8);
@@ -120,7 +134,7 @@ int Program::run() {
     const float timestep = 1.0f / 60;
 
     while (running && device->run()) {
-        acceptInput(eventReceiver);
+        acceptInput(eventReceiver, shapes);
         world->update(timestep);
 
         driver->beginScene(true, true, {255, 127, 127, 127});

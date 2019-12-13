@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "Shapes.hpp"
 #include "World.hpp"
 
 namespace Playground::Game {
@@ -14,16 +15,24 @@ namespace Playground::Game {
 
       protected:
         World* world;
-        irr::scene::ISceneNode* sceneNode;
         std::unique_ptr<btMotionState> motionState;
+        std::shared_ptr<btCollisionShape> shape;
         std::unique_ptr<btRigidBody> body;
 
+        std::shared_ptr<irr::scene::IMesh> mesh;
+        irr::scene::ISceneNode* sceneNode;
+
       public:
-        Entity(btCollisionShape*, btScalar, btVector3, btVector3);
+        Entity(ShapePair, btVector3);
+
+        void applyImpulse(btVector3 impulse) {
+            body->applyCentralImpulse(impulse);
+        }
 
         virtual void update();
 
-        virtual ~Entity();
+        virtual ~Entity() {
+        }
     };
 }
 

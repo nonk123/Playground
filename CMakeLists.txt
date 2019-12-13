@@ -12,7 +12,8 @@ set(PLAYGROUND_SRC
   src/Program.cpp
   src/EventReceiver.cpp
   src/World.cpp
-  src/Entity.cpp)
+  src/Entity.cpp
+  src/Shapes.cpp)
 
 set(PLAYGROUND_DRIVER "OPENGL" CACHE STRING
   "Irrlicht video driver to use, without the irr::video::EDT_ prefix.")
